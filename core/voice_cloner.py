@@ -8,6 +8,7 @@ class VoiceCloner:
         self.lang_code = lang_code
     
     def process(self, speaker_wav_filename, text, out_filename=None):
+        # assert 1==0, text
         temp_manager = TempFileManager()
         if not out_filename:
             out_filename = temp_manager.create_temp_file(suffix='.wav').name
@@ -32,14 +33,15 @@ class Pre_VoiceCloner:
     def __init__(self, lang_code):
         print("Loading model tts_models--multilingual--multi-dataset--xtts_v1.1")
         config = XttsConfig()
-        config.load_json("/root/.local/share/tts/tts_models--multilingual--multi-dataset--xtts_v1.1/config.json")
+        config.load_json("~/.local/share/tts/tts_models--multilingual--multi-dataset--xtts_v1.1/config.json")
         model = Xtts.init_from_config(config)
-        model.load_checkpoint(config, checkpoint_dir="/root/.local/share/tts/tts_models--multilingual--multi-dataset--xtts_v1.1")
+        model.load_checkpoint(config, checkpoint_dir="~/.local/share/tts/tts_models--multilingual--multi-dataset--xtts_v1.1")
         model.cuda()
         self.model = model
         self.lang_code = lang_code
     
     def process(self, speaker_wav_filename, text, out_filename=None):
+        # assert 1==0, text
         temp_manager = TempFileManager()
         if not out_filename:
             out_filename = temp_manager.create_temp_file(suffix='.wav').name

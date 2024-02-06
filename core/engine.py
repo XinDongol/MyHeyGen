@@ -27,6 +27,7 @@ import subprocess
 from pathlib import Path
 from tqdm import tqdm
 from moviepy.video.io.VideoFileClip import VideoFileClip
+import json
 
 class Engine:
     def __init__(self, config, output_language):
@@ -59,6 +60,7 @@ class Engine:
         orig_clip.audio.write_audiofile(original_audio_file, codec='pcm_s16le', verbose=False, logger=None)
 
         dereverb_out = self.dereverb.split(original_audio_file)
+        # assert 1==0, dereverb_out
         voice_audio = AudioSegment.from_file(dereverb_out['voice_file'], format='wav')
         noise_audio = AudioSegment.from_file(dereverb_out['noise_file'], format='wav')
 
@@ -105,6 +107,12 @@ class Engine:
         updates = []
         zimu_path = Path(output_file_path).parent.joinpath('zimu.txt')
         print(zimu_path)
+        # # save speakers to json
+        # with open("speakers.json", 'w', encoding="utf-8") as f:
+        #     for speaker in speakers:
+        #         f.write(json.dumps(speaker) + '\n')
+        # assert 1==0
+        # save zimu to txt 
         for speaker in speakers:
             if 'id' in speaker:
                 voice = merged_voices[speaker['id']]
@@ -212,10 +220,29 @@ class Engine:
         
     def transcribe_audio_extended(self, audio_file):
         audio = load_audio(audio_file)
-        result = self.whisper.transcribe(audio, batch_size=self.whisper_batch_size)
+        result = self.whisper.transcribe(audio, batch_size=self.whisper_batch_size, chunk_size=20)
+
+        # # save to json
+        # with open('result.json', 'w', encoding='utf-8') as f:
+        #     json.dump(result, f, ensure_ascii=False, indent=4)
+        # # assert 1==0, result
+
         language = result['language']
         model_a, metadata = load_align_model(language_code=language, device=self.device)
         result = align(result['segments'], model_a, metadata, audio, self.device, return_char_alignments=False)
+
+        # with open('result_aligned.json', 'w', encoding='utf-8') as f:
+        #     json.dump(result, f, ensure_ascii=False, indent=4)
+        
         diarize_segments = self.diarize_model(audio)
+
+        # diarize_segments is a DataFrame, save it to csv
+        diarize_segments.to_csv('result_diarize.csv', index=False)
+
         result = assign_word_speakers(diarize_segments, result)
+
+        # with open('result_speakers.json', 'w', encoding='utf-8') as f:
+        #     json.dump(result, f, ensure_ascii=False, indent=4)
+        # assert 1==0 
+
         return result['segments'], language

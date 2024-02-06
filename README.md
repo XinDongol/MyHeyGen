@@ -23,7 +23,7 @@ bash install.sh
 ```
 ## 测试
 ```
-python translate.py /root/MyHeyGen/test/src.mp4 'zh-cn' -o /root/MyHeyGen/test/out_zh.mp4
+python translate.py ~/MyHeyGen/test/src.mp4 'zh-cn' -o ~/MyHeyGen/test/out_zh.mp4
 ```
 ## 自己使用
 ```
